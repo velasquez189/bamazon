@@ -11,31 +11,60 @@ var connection = mysql.createConnection({
     database: "bamazonDB"
 });
 
-connection.connect(function(err){
+connection.connect(function (err) {
     if (err) throw err;
     console.log("Connected to" + connection.threadId + "\n");
-    showItems();
-    connection.end()
+    start();
+    // connection.end()
 });
 
-
-function showItems(){
-    connection.query("SELECT * FROM products", function(err, res){
-        for(var i = 0; i < res.length; i++){
-            console.log(res[i].item_id + " | " + res[i].product_name + " | " + res[i].price);   
+//Display Table with IDs, Product Name, and Pricing
+function showItems() {
+    connection.query("SELECT * FROM products", function (err, res) {
+        for (var i = 0; i < res.length; i++) {
+            console.log(res[i].item_id + " | " + res[i].product_name + " | " + res[i].price);
         }
-        console.log("-----------------------------------");
+        console.log("\n-----------------------------------\n");
     });
 }
 
+//Displays the questions of Item ID and 
 function start() {
-   showItems();
-    inquirer
-    .prompt({
-        name: "id",
-        type: "rawlist",
-        message:"Do you know the product ID of your item?",
+    showItems();
+    connection.query("SELECT * FROM products", function (err, res) {
+        if (err) throw err;
+        inquirer.prompt([{
+                    name: "choice",
+                    type: "input",
+                    message: "Do you know the product ID of your item?",
+                },
+                {
+                    name: "quantity",
+                    type: "input",
+                    message: "How many would you like to purchase?"
+                }
+            ])
+            .then(function (answer) {
+                var selection = answer.choice - 1;
+                if (answer.quantity > res[selection].stock_quantity) {
+                    console.log("Too many ordered.");
+                } else {
+                    connection.query(
+                        "UPDATE products SET ? WHERE ?", [{
+                                stock_quantity: answer.quantity
+                            },
+                            {
+                                item_id: answer.choice
+                            }
+                        ],
+                        function (err) {
+                            if (err) throw err;
+                            console.log("New item(s) in your cart!");
+                            // start();
+                        }
+                    );
+                }
 
-    })
+            })
+    });
 }
-
