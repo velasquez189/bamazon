@@ -6,7 +6,7 @@ bamazon is used from the command line and needs a MySQL database connected to it
 
 You will be introduced to a list of items to choose from with prices and quantities.
 
-Choose which item you would like to perchase and how much.
+Choose which item you would like to purchase and how much.
 
 You will be informed in the order can be completed with a price and message.
 
